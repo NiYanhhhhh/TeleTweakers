@@ -3,7 +3,7 @@
   "modid": "teletweakers",
   "name": "Teleport Tweakers",
   "description": "Changes the ways to some dimensions",
-  "version": "1.0.0",
+  "version": "{version}",
   "mcversion": "1.12.2",
   "url": "",
   "updateUrl": "",

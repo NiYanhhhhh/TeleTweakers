@@ -6,28 +6,31 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Teleporter;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
 public class TTTeleporter extends Teleporter {
 
-    public static TTTeleporter getTTTeleporter(MinecraftServer server, int dim) {
-        WorldServer ws = server.getWorld(dim);
-        for (Teleporter t : ws.customTeleporters) {
+    public TTTeleporter(WorldServer worldIn, World worldOld) {
+        super(worldIn);
+        this.worldIn = worldIn;
+        this.worldOld = worldOld;
+    }
+    
+    public WorldServer worldIn;
+    public World worldOld;
+
+    public TTTeleporter getTTTeleporter() {
+        for (Teleporter t : worldIn.customTeleporters) {
             if (t instanceof TTTeleporter) {
                 return (TTTeleporter) t;
             }
         }
 
-        TTTeleporter tp = new TTTeleporter(ws);
-        ws.customTeleporters.add(tp);
-        return tp;
-    }
-
-    public TTTeleporter(WorldServer worldIn) {
-        super(worldIn);
+        worldIn.customTeleporters.add(this);
+        return this;
     }
 
     @Override
@@ -39,6 +42,7 @@ public class TTTeleporter extends Teleporter {
             desY = 15;
         }
         double desZ = entityPos.getZ();
+        BlockPos desPos = new BlockPos(desX, desY, desZ);
         if (entityIn instanceof EntityPlayerMP) {
             ((EntityPlayerMP) entityIn).connection.setPlayerLocation(desX, desY, desZ, entityIn.rotationYaw,
                     entityIn.rotationPitch);
@@ -52,12 +56,12 @@ public class TTTeleporter extends Teleporter {
 
         IBlockState air = Blocks.AIR.getDefaultState();
         IBlockState fire = Blocks.FIRE.getDefaultState();
-        world.setBlockState(entityPos, air);
-        world.setBlockState(entityPos.west(), fire);
-        world.setBlockState(entityPos.east(), fire);
-        world.setBlockState(entityPos.north(), fire);
-        world.setBlockState(entityPos.south(), fire);
-        world.setBlockState(entityPos.up(), air);
+        world.setBlockState(desPos, air);
+        world.setBlockState(desPos.west(), fire);
+        world.setBlockState(desPos.east(), fire);
+        world.setBlockState(desPos.north(), fire);
+        world.setBlockState(desPos.south(), fire);
+        world.setBlockState(desPos.up(), air);
     }
 
     @Override

@@ -7,6 +7,7 @@ import com.niyanhhhhh.teletweakers.config.TTConfig;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
@@ -15,10 +16,14 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraftforge.event.entity.player.PlayerWakeUpEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import twilightforest.TFConfig;
+import twilightforest.TFTeleporter;
 
 @Mod.EventBusSubscriber(modid = TTMain.MODID)
 public class TTCommonEventHandler {
@@ -36,19 +41,17 @@ public class TTCommonEventHandler {
         Field sizeField;
         Vec3d explosionPos = explosion.getPosition();
         List<Entity> affectedEntity = event.getAffectedEntities();
-        System.out.println(affectedEntity);
 
         try {
             sizeField = Explosion.class.getDeclaredField("field_77280_f");
             sizeField.setAccessible(true);
             float size = (float) sizeField.get(explosion);
 
-            if (explosionPos.y <= 7 && size > 7 && checkStructure(event, explosionPos) && !affectedEntity.isEmpty()) {
+            if (explosionPos.y <= 7 && size >= 7 && checkStructure(event, explosionPos) && !affectedEntity.isEmpty()) {
                 affectedEntity.forEach(entity -> {
                     if (entity instanceof EntityPlayerMP) {
                         if (isInExplosionCenter(entity.getPositionVector(), explosionPos)) {
-                            System.out.println("teleport " + entity);
-                            teleportPlayer(entity, true);
+                            teleportPlayer(entity, true, -1);
                         }
                     }
                 });
@@ -62,6 +65,20 @@ public class TTCommonEventHandler {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
+        }
+    }
+    
+    @SubscribeEvent
+    public static void teleportToTF(PlayerWakeUpEvent event) {
+        if (Loader.isModLoaded("twilightforest")) {
+            EntityPlayer player = event.getEntityPlayer();
+            World world = player.world;
+            double px = player.getPosition().getX();
+            long time = world.getWorldTime();
+            
+            if (time > 12000 && time < 14000 && px < -20000 && player instanceof EntityPlayerMP) {
+                teleportPlayer(player, true, TFConfig.dimension.dimensionID);
+            }
         }
     }
 
@@ -113,7 +130,7 @@ public class TTCommonEventHandler {
             return false;
     }
 
-    private static void teleportPlayer(Entity entity, boolean forcedEntry) {
+    private static void teleportPlayer(Entity entity, boolean forcedEntry, int dim) {
 
         if (entity.isDead || entity.world.isRemote) {
             return;
@@ -125,15 +142,29 @@ public class TTCommonEventHandler {
 
         entity.dismountRidingEntity();
         entity.removePassengers();
-        int destination = getDestination(entity);
-        WorldServer ws = entity.getServer().getWorld(destination);
+        int destination = getDestination(entity, dim);
+        WorldServer WorldIn = entity.getServer().getWorld(destination);
+        TTTeleporter tt = new TTTeleporter(WorldIn, entity.getEntityWorld());
 
-        entity.changeDimension(destination, TTTeleporter.getTTTeleporter(entity.getServer(), destination));
+        if (dim == -1) {
+            entity.changeDimension(destination, tt);
+        } else if (dim == TFConfig.dimension.dimensionID) {
+            entity.changeDimension(destination, TFTeleporter.getTeleporterForDim(entity.getServer(), destination));
+        } else {
+        }
 
     }
 
-    private static int getDestination(Entity entity) {
-        return entity.dimension != -1 ? -1 : 0;
+    private static int getDestination(Entity entity, int dim) {
+        if (entity.dimension == 0) {
+            return dim;
+        } else {
+            if (entity.dimension != dim) {
+                return entity.dimension;
+            } else {
+                return 0;
+            }
+        }
     }
 
 }
