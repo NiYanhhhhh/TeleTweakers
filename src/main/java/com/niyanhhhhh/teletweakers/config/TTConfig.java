@@ -12,6 +12,6 @@ public class TTConfig {
     
     @Comment("when it's set to be true, the nether portal won't spawn through igniting.(default: true)")
     @LangKey("config.teletweakers.general.cancelportal")
-    public static boolean cancelPortalSpawn = true;
+    public static boolean portalTweaks = true;
 
 }

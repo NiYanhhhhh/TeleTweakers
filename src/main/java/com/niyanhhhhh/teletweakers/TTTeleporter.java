@@ -11,6 +11,7 @@ import net.minecraft.world.Teleporter;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 
+// Useless temporarily
 public class TTTeleporter extends Teleporter {
 
     public TTTeleporter(WorldServer worldIn, World worldOld) {

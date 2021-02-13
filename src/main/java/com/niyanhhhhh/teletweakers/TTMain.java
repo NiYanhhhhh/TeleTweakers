@@ -8,12 +8,12 @@ import com.niyanhhhhh.teletweakers.common.CommonProxy;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 
-@Mod(modid = TTMain.MODID, name = TTMain.MODNAME, version = TTMain.MODVERSION, acceptedMinecraftVersions = TTMain.MC_VERSION, dependencies = "after:twilightforest")
+@Mod(modid = TTMain.MODID, name = TTMain.MODNAME, version = TTMain.MODVERSION, acceptedMinecraftVersions = TTMain.MC_VERSION, dependencies = "after:twilightforest;after:tfc")
 public class TTMain {
 
     public static final String MODID = "teletweakers";
     public static final String MODNAME = "Teleport Tweakers";
-    public static final String MODVERSION = "1.0.0";
+    public static final String MODVERSION = "1.2.0";
     public static final String MC_VERSION = "[1.12.2]";
 
     public static final Logger LOGGER = LogManager.getLogger(MODID);
